@@ -1,4 +1,4 @@
-package main
+package chapter5
 
 type City struct {
 	latitude  float64

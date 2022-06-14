@@ -1,8 +1,8 @@
-package main
+package chapter5
 
 import "fmt"
 
-func main() {
+func Main() {
 	oxford := CreateCity(51.45, 1.15)
 	turin := CreateCity(45.04, 7.42)
 	athens := CreateCity(37.983972, 23.727806)

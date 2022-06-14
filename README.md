@@ -10,13 +10,13 @@ go run order.go
 
 ## Chapter 5
 
-Run on chapter5/src
+Run on root
 
 ```bash
 go run .
 ```
 
-Run testing
+Run on chapter5/src for testing
 
 ```bash
 go test ./...
