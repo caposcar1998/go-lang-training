@@ -1,6 +1,8 @@
 package employee
 
-import "time"
+import (
+	"time"
+)
 
 type Position int
 

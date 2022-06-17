@@ -1,13 +1,19 @@
 package employee
 
 import (
+	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
+
+type Repository interface {
+	Employees(ctx context.Context, pos Position) ([]Employee, error)
+	EmployeeRetrieve(ctx context.Context, id int) (*Employee, error)
+	Save(ctx context.Context, e *Employee) error
+}
 
 func dbConn() (db *sql.DB) {
 	dbDriver := "mysql"
@@ -21,9 +27,9 @@ func dbConn() (db *sql.DB) {
 	return db
 }
 
-func RetrieveOneValueById(table string, value string) Employee {
+func EmployeeRetrieve(id int) (Employee, error) {
 	var (
-		id           int
+		idR          int
 		full_name    string
 		position     int
 		salary       float64
@@ -33,17 +39,17 @@ func RetrieveOneValueById(table string, value string) Employee {
 	)
 	var employee Employee
 	db := dbConn()
-	row := db.QueryRow("SELECT * FROM " + table + " WHERE id = " + value)
-	err := row.Scan(&id, &full_name, &position, &salary, &joined, &on_probation, &created_at)
+	row := db.QueryRow("SELECT * FROM ? WHERE id = ? ", id)
+	err := row.Scan(&idR, &full_name, &position, &salary, &joined, &on_probation, &created_at)
 	if err != nil {
 		log.Fatal(err)
 	}
-	employee = Employee{id, full_name, Position(position), salary, joined, on_probation, created_at}
+	employee = Employee{idR, full_name, Position(position), salary, joined, on_probation, created_at}
 
-	return employee
+	return employee, nil
 }
 
-func RetrieveByPositions(table string, p string) ([]Employee, error) {
+func Employees(p string) ([]Employee, error) {
 	var (
 		id           int
 		full_name    string
@@ -55,7 +61,7 @@ func RetrieveByPositions(table string, p string) ([]Employee, error) {
 	)
 	var employees []Employee
 	db := dbConn()
-	rows, err := db.Query("SELECT * FROM ? WHERE position = ?", table, p)
+	rows, err := db.Query("SELECT * FROM employee WHERE position = ?", p)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,22 +113,22 @@ func RetrieveAllValues(table string) ([]Employee, error) {
 	return employees, nil
 }
 
-func CreateEmployee(employee Employee) bool {
+func Save(employee Employee) error {
 	db := dbConn()
-	res, err := db.Exec("INSERT INTO employee (full_name, position,salary,joined,on_probation) VALUES (? ,? , ? , ? , ?)", employee.FullName, employee.Position, employee.Salary, time.Now(), employee.OnProbation)
+	_, err := db.Exec("INSERT INTO employee (full_name, position,salary,joined,on_probation) VALUES (? ,? , ? , ? , ?)", employee.FullName, employee.Position, employee.Salary, time.Now(), employee.OnProbation)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
-	fmt.Println(res)
-	return true
+	return nil
 }
 
-func UpdateEmployee(employee Employee, id string) bool {
+func UpdateEmployee(employee Employee, id string) error {
 	db := dbConn()
-	res, err := db.Exec("UPDATE employee SET full_name = ?, position = ?, salary = ?, joined = ?, on_probation = ? WHERE id = ? ", employee.FullName, employee.Position, employee.Salary, time.Now(), employee.OnProbation, id)
+	_, err := db.Exec("UPDATE employee SET full_name = ?, position = ?, salary = ?, joined = ?, on_probation = ? WHERE id = ? ", employee.FullName, employee.Position, employee.Salary, time.Now(), employee.OnProbation, id)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
-	fmt.Println(res)
-	return true
+	return nil
 }

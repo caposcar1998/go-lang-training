@@ -1,6 +1,7 @@
 package employee
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -9,23 +10,32 @@ import (
 func QueryEmployee(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+		var rep Repository
+		ctx := context.TODO()
 		id := r.URL.Query().Get("id")
-		var employee = RetrieveOneValueById("employee", id)
-		var returnValues, _ = json.MarshalIndent(employee, "", "  ")
-		w.Write(returnValues)
+
+		var employee, err = rep.EmployeeRetrieve(ctx, id)
+		if err != nil {
+			var returnValues, _ = json.MarshalIndent(employee, "", "  ")
+			w.Write(returnValues)
+		} else {
+			io.WriteString(w, err.Error())
+		}
 
 	case "POST":
+		var rep Repository
+		ctx := context.TODO()
 		var employee Employee
 		err := json.NewDecoder(r.Body).Decode(&employee)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		var employeeSaved = CreateEmployee(employee)
-		if employeeSaved {
-			io.WriteString(w, "True")
+		var employeeSaved = rep.Save(ctx, &employee)
+		if employeeSaved != nil {
+			io.WriteString(w, employeeSaved.Error())
 		} else {
-			io.WriteString(w, "False")
+			io.WriteString(w, "ok")
 		}
 
 	case "PUT":
@@ -37,10 +47,10 @@ func QueryEmployee(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var employeeSaved = UpdateEmployee(employee, id)
-		if employeeSaved {
-			io.WriteString(w, "True")
+		if employeeSaved != nil {
+			io.WriteString(w, employeeSaved.Error())
 		} else {
-			io.WriteString(w, "False")
+			io.WriteString(w, "ok")
 		}
 	case "DELETE":
 		//NOT IMPLEMENTED
@@ -60,7 +70,7 @@ func QueryEmployeesPosition(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		position := r.URL.Query().Get("position")
-		var employees, _ = RetrieveByPositions("employee", position)
+		var employees, _ = Employees(position)
 		var returnValues, _ = json.MarshalIndent(employees, "", "  ")
 		w.Write(returnValues)
 	}
