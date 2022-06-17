@@ -55,7 +55,7 @@ func RetrieveByPositions(table string, p string) ([]Employee, error) {
 	)
 	var employees []Employee
 	db := dbConn()
-	rows, err := db.Query("SELECT * FROM " + table + " WHERE position = " + p)
+	rows, err := db.Query("SELECT * FROM ? WHERE position = ?", table, p)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func RetrieveAllValues(table string) ([]Employee, error) {
 	)
 	var employees []Employee
 	db := dbConn()
-	rows, err := db.Query("SELECT * FROM " + table)
+	rows, err := db.Query("SELECT * FROM ? ", table)
 	if err != nil {
 		log.Fatal(err)
 	}
