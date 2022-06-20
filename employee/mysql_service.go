@@ -39,7 +39,7 @@ func EmployeeRetrieve(id int) (Employee, error) {
 	)
 	var employee Employee
 	db := dbConn()
-	row := db.QueryRow("SELECT * FROM ? WHERE id = ? ", id)
+	row := db.QueryRow("SELECT * FROM employee WHERE id = ? ", id)
 	err := row.Scan(&idR, &full_name, &position, &salary, &joined, &on_probation, &created_at)
 	if err != nil {
 		log.Fatal(err)
