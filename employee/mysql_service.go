@@ -93,7 +93,7 @@ func RetrieveAllValues(table string) ([]Employee, error) {
 	)
 	var employees []Employee
 	db := dbConn()
-	rows, err := db.Query("SELECT * FROM ? ", table)
+	rows, err := db.Query("SELECT * FROM " + table)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -113,7 +113,7 @@ func RetrieveAllValues(table string) ([]Employee, error) {
 	return employees, nil
 }
 
-func Save(employee Employee) error {
+func Save(employee *Employee) error {
 	db := dbConn()
 	_, err := db.Exec("INSERT INTO employee (full_name, position,salary,joined,on_probation) VALUES (? ,? , ? , ? , ?)", employee.FullName, employee.Position, employee.Salary, time.Now(), employee.OnProbation)
 	if err != nil {

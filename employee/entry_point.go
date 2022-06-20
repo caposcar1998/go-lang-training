@@ -5,16 +5,22 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 )
+
+var rep Repository
+var ctx = context.TODO()
+var employee Employee
 
 func QueryEmployee(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		var rep Repository
+
 		ctx := context.TODO()
 		id := r.URL.Query().Get("id")
 
-		var employee, err = rep.EmployeeRetrieve(ctx, id)
+		var idInteger, _ = strconv.Atoi(id)
+		var employee, err = rep.EmployeeRetrieve(ctx, idInteger)
 		if err != nil {
 			var returnValues, _ = json.MarshalIndent(employee, "", "  ")
 			w.Write(returnValues)
@@ -23,9 +29,6 @@ func QueryEmployee(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "POST":
-		var rep Repository
-		ctx := context.TODO()
-		var employee Employee
 		err := json.NewDecoder(r.Body).Decode(&employee)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -39,7 +42,6 @@ func QueryEmployee(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "PUT":
-		var employee Employee
 		id := r.URL.Query().Get("id")
 		err := json.NewDecoder(r.Body).Decode(&employee)
 		if err != nil {
