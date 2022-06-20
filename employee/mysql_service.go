@@ -27,7 +27,7 @@ func dbConn() (db *sql.DB) {
 	return db
 }
 
-func EmployeeRetrieve(id int) (Employee, error) {
+func (e Employee) EmployeeRetrieve(id int) (Employee, error) {
 	var (
 		idR          int
 		full_name    string
@@ -49,7 +49,7 @@ func EmployeeRetrieve(id int) (Employee, error) {
 	return employee, nil
 }
 
-func Employees(p string) ([]Employee, error) {
+func (e Employee) Employees(p string) ([]Employee, error) {
 	var (
 		id           int
 		full_name    string
@@ -113,7 +113,7 @@ func RetrieveAllValues(table string) ([]Employee, error) {
 	return employees, nil
 }
 
-func Save(employee *Employee) error {
+func (e Employee) Save(employee *Employee) error {
 	db := dbConn()
 	_, err := db.Exec("INSERT INTO employee (full_name, position,salary,joined,on_probation) VALUES (? ,? , ? , ? , ?)", employee.FullName, employee.Position, employee.Salary, time.Now(), employee.OnProbation)
 	if err != nil {
