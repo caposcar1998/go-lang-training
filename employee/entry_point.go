@@ -16,17 +16,13 @@ func QueryEmployee(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 
-		ctx := context.TODO()
 		id := r.URL.Query().Get("id")
 
 		var idInteger, _ = strconv.Atoi(id)
-		var employee, err = rep.EmployeeRetrieve(ctx, idInteger)
-		if err != nil {
-			var returnValues, _ = json.MarshalIndent(employee, "", "  ")
-			w.Write(returnValues)
-		} else {
-			io.WriteString(w, err.Error())
-		}
+		var employee, _ = EmployeeRetrieve(idInteger)
+
+		var returnValues, _ = json.MarshalIndent(employee, "", "  ")
+		w.Write(returnValues)
 
 	case "POST":
 		err := json.NewDecoder(r.Body).Decode(&employee)
