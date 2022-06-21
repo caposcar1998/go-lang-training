@@ -3,6 +3,7 @@ package employee
 import (
 	"database/sql"
 	"log"
+	"regexp"
 	"testing"
 	"time"
 
@@ -30,16 +31,20 @@ func NewMock() (*sql.DB, sqlmock.Sqlmock, error) {
 }
 
 func TestEmployee_RetrieveId(t *testing.T) {
-	db, mock, err := NewMock()
-	defer db.Close()
+	db, mock, _ := NewMock()
+	repo := &repository{db}
+	defer func() {
+		repo.Close()
+	}()
 
-	query := "SELECT * FROM employee WHERE id = //?"
-	mock.ExpectBegin()
-	mock.ExpectQuery(query).WithArgs(u.ID).WillReturnRows()
-	mock.ExpectCommit()
+	query := regexp.QuoteMeta("SELECT * FROM employee WHERE id = ?")
 
-	user, err := employee.EmployeeRetrieve(u.ID)
+	rows := sqlmock.NewRows([]string{"id", "full_name", "position", "salary", "joined", "on_probation", "created_at"}).
+		AddRow(u.ID, u.FullName, u.Position, u.Salary, u.Joined, u.OnProbation, u.CreatedAt)
 
+	mock.ExpectQuery(query).WithArgs(u.ID).WillReturnRows(rows)
+
+	user, err := repo.EmployeeRetrieve(u.ID)
 	assert.NotNil(t, user)
 	assert.NoError(t, err)
 }
