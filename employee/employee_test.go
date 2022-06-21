@@ -21,6 +21,25 @@ var u = Employee{
 	CreatedAt:   time.Now(),
 }
 
+var u2 = Employee{
+	ID:          2,
+	FullName:    "Hector Contreras",
+	Position:    2,
+	Salary:      600.00,
+	Joined:      time.Now(),
+	OnProbation: true,
+	CreatedAt:   time.Now(),
+}
+
+var u3 = Employee{
+	ID:          2,
+	FullName:    "Hector Contreras",
+	Position:    2,
+	Salary:      600.00,
+	Joined:      time.Now(),
+	OnProbation: true,
+}
+
 func NewMock() (*sql.DB, sqlmock.Sqlmock, error) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -51,10 +70,69 @@ func TestEmployee_RetrieveId(t *testing.T) {
 
 func TestEmployee_Save(t *testing.T) {
 
+	db, mock, _ := NewMock()
+	repo := &repository{db}
+	defer func() {
+		repo.Close()
+	}()
+	query := regexp.QuoteMeta("INSERT INTO employee (full_name, position,salary,joined,on_probation) VALUES (? ,? , ? , ? , ?)")
+	prep := mock.ExpectPrepare(query)
+	prep.ExpectExec().WithArgs(u.FullName, u.Position, u.Salary, u.Joined, u.OnProbation).WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := repo.Save(&u3)
+	assert.NoError(t, err)
 }
 
-func TestEmpoyee_Update(t *testing.T) {}
+func TestEmpoyee_Update(t *testing.T) {
+	db, mock, _ := NewMock()
+	repo := &repository{db}
+	defer func() {
+		repo.Close()
+	}()
+	query := regexp.QuoteMeta("UPDATE employee SET full_name = ?, position = ?, salary = ?, joined = ?, on_probation = ? WHERE id = ? ")
+	prep := mock.ExpectPrepare(query)
+	prep.ExpectExec().WithArgs(u.FullName, u.Position, u.Salary, u.Joined, u.OnProbation).WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := repo.UpdateEmployee(u3, "1")
+	assert.NoError(t, err)
+}
 
 func TestEmployee_RetrieveAll(t *testing.T) {
+	db, mock, _ := NewMock()
+	repo := &repository{db}
+	defer func() {
+		repo.Close()
+	}()
 
+	query := regexp.QuoteMeta("SELECT * FROM employee")
+
+	rows := sqlmock.NewRows([]string{"id", "full_name", "position", "salary", "joined", "on_probation", "created_at"}).
+		AddRow(u.ID, u.FullName, u.Position, u.Salary, u.Joined, u.OnProbation, u.CreatedAt).
+		AddRow(u2.ID, u2.FullName, u2.Position, u2.Salary, u2.Joined, u2.OnProbation, u2.CreatedAt)
+
+	mock.ExpectQuery(query).WithArgs().WillReturnRows(rows)
+
+	user, err := repo.RetrieveAllValues("employee")
+	assert.NotNil(t, user)
+	assert.NoError(t, err)
+}
+
+func TestEmployee_RetrievePosition(t *testing.T) {
+	db, mock, _ := NewMock()
+	repo := &repository{db}
+	defer func() {
+		repo.Close()
+	}()
+
+	query := regexp.QuoteMeta("SELECT * FROM employee WHERE position = ?")
+
+	rows := sqlmock.NewRows([]string{"id", "full_name", "position", "salary", "joined", "on_probation", "created_at"}).
+		AddRow(u.ID, u.FullName, u.Position, u.Salary, u.Joined, u.OnProbation, u.CreatedAt).
+		AddRow(u2.ID, u2.FullName, u2.Position, u2.Salary, u2.Joined, u2.OnProbation, u2.CreatedAt)
+
+	mock.ExpectQuery(query).WithArgs("1").WillReturnRows(rows)
+
+	user, err := repo.Employees("1")
+	assert.NotNil(t, user)
+	assert.NoError(t, err)
 }
