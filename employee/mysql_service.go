@@ -13,6 +13,8 @@ type Repository interface {
 	Employees(ctx context.Context, pos Position) ([]Employee, error)
 	EmployeeRetrieve(ctx context.Context, id int) (*Employee, error)
 	Save(ctx context.Context, e *Employee) error
+	RetrieveAllValues(ctx context.Context, table string) ([]Employee, error)
+	UpdateEmployee(ctx context.Context) error
 }
 
 func dbConn() (db *sql.DB) {
@@ -81,7 +83,7 @@ func (e Employee) Employees(p string) ([]Employee, error) {
 	return employees, nil
 }
 
-func RetrieveAllValues(table string) ([]Employee, error) {
+func (e Employee) RetrieveAllValues(table string) ([]Employee, error) {
 	var (
 		id           int
 		full_name    string
@@ -123,7 +125,7 @@ func (e Employee) Save(employee *Employee) error {
 	return nil
 }
 
-func UpdateEmployee(employee Employee, id string) error {
+func (e Employee) UpdateEmployee(employee Employee, id string) error {
 	db := dbConn()
 	_, err := db.Exec("UPDATE employee SET full_name = ?, position = ?, salary = ?, joined = ?, on_probation = ? WHERE id = ? ", employee.FullName, employee.Position, employee.Salary, time.Now(), employee.OnProbation, id)
 	if err != nil {

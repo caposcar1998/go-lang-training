@@ -8,7 +8,6 @@ import (
 	"strconv"
 )
 
-var rep Repository
 var ctx = context.TODO()
 var employee Employee
 
@@ -44,7 +43,7 @@ func QueryEmployee(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		var employeeSaved = UpdateEmployee(employee, id)
+		var employeeSaved = employee.UpdateEmployee(employee, id)
 		if employeeSaved != nil {
 			io.WriteString(w, employeeSaved.Error())
 		} else {
@@ -58,7 +57,7 @@ func QueryEmployee(w http.ResponseWriter, r *http.Request) {
 func QueryEmployees(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		var employees, _ = RetrieveAllValues("employee")
+		var employees, _ = employee.RetrieveAllValues("employee")
 		var returnValues, _ = json.MarshalIndent(employees, "", "  ")
 		w.Write(returnValues)
 	}
